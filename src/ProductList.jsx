@@ -5,6 +5,10 @@ import CartItem from "./CartItem";
 import { useDispatch } from "react-redux";
 import { addItem } from "./CartSlice"; // Adjust path if needed
 
+
+
+
+
 function ProductList({ onHomeClick }) {
   const dispatch = useDispatch();
   const [addedToCart, setAddedToCart] = useState({});
