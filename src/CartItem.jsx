@@ -8,8 +8,7 @@ const CartItem = ({ onContinueShopping }) => {
   const dispatch = useDispatch();
 
   const handleRemove = (item) => {
-    // Assuming removeItem expects { name }
-    dispatch(removeItem({ name: item.name }));
+    dispatch(removeItem(item.name)); // FIXED: Only pass name
   };
 
   const handleIncrement = (item) => {
@@ -22,25 +21,31 @@ const CartItem = ({ onContinueShopping }) => {
       const newQuantity = item.quantity - 1;
       dispatch(updateQuantity({ name: item.name, quantity: newQuantity }));
     } else {
-      dispatch(removeItem({ name: item.name }));
+      dispatch(removeItem(item.name)); // FIXED: Only pass name
     }
   };
 
   const parseCost = (cost) => {
-    // If cost is a string like "$4.99", parse the number part
     return typeof cost === 'string' ? parseFloat(cost.substring(1)) : cost;
   };
 
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(value);
+
   const calculateTotalCost = (item) => {
     const price = parseCost(item.cost);
-    return (price * item.quantity).toFixed(2);
+    return formatCurrency(price * item.quantity);
   };
 
   const calculateTotalAmount = () => {
-    return cart.reduce((total, item) => {
+    const total = cart.reduce((total, item) => {
       const price = parseCost(item.cost);
       return total + price * item.quantity;
-    }, 0).toFixed(2);
+    }, 0);
+    return formatCurrency(total);
   };
 
   const handleContinueShopping = (e) => {
@@ -50,21 +55,28 @@ const CartItem = ({ onContinueShopping }) => {
 
   const handleCheckoutShopping = (e) => {
     e.preventDefault();
-    alert('Functionality to be added for future reference');
+    alert('Checkout functionality to be added.');
   };
 
   return (
     <div className="cart-container">
       <h2 style={{ color: 'black' }}>
-        Total Cart Amount: ${calculateTotalAmount()}
+        Total Cart Amount: {calculateTotalAmount()}
       </h2>
-      <div>
-        {cart.map(item => (
+
+      {cart.length === 0 ? (
+        <p style={{ color: 'gray', textAlign: 'center' }}>
+          Your cart is empty.
+        </p>
+      ) : (
+        cart.map(item => (
           <div className="cart-item" key={item.name}>
             <img className="cart-item-image" src={item.image} alt={item.name} />
             <div className="cart-item-details">
               <div className="cart-item-name">{item.name}</div>
-              <div className="cart-item-cost">${parseCost(item.cost).toFixed(2)}</div>
+              <div className="cart-item-cost">
+                {formatCurrency(parseCost(item.cost))}
+              </div>
               <div className="cart-item-quantity">
                 <button
                   className="cart-item-button cart-item-button-dec"
@@ -81,7 +93,7 @@ const CartItem = ({ onContinueShopping }) => {
                 </button>
               </div>
               <div className="cart-item-total">
-                Total: ${calculateTotalCost(item)}
+                Total: {calculateTotalCost(item)}
               </div>
               <button
                 className="cart-item-delete"
@@ -91,12 +103,13 @@ const CartItem = ({ onContinueShopping }) => {
               </button>
             </div>
           </div>
-        ))}
-      </div>
+        ))
+      )}
+
       <div className="continue_shopping_btn">
         <button
           className="get-started-button"
-          onClick={(e) => handleContinueShopping(e)}
+          onClick={handleContinueShopping}
         >
           Continue Shopping
         </button>
